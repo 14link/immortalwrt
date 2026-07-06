@@ -73,11 +73,11 @@ static nvram_tuple_t * _nvram_realloc( nvram_handle_t *h, nvram_tuple_t *t,
 		return NULL;
 
 	if (!t) {
-		t = malloc(sizeof(nvram_tuple_t) + strlen(name) + 1);
-		if (!t)
+		if (!(t = malloc(sizeof(nvram_tuple_t) + strlen(name) + 1)))
 			return NULL;
 
 		/* Copy name */
+		t->name = (char *) &t[1];
 		strcpy(t->name, name);
 
 		t->value = NULL;
@@ -86,8 +86,7 @@ static nvram_tuple_t * _nvram_realloc( nvram_handle_t *h, nvram_tuple_t *t,
 	/* Copy value */
 	if (!t->value || strcmp(t->value, value))
 	{
-		t->value = realloc(t->value, strlen(value) + 1);
-		if(!t->value)
+		if(!(t->value = (char *) realloc(t->value, strlen(value)+1)))
 			return NULL;
 
 		strcpy(t->value, value);
@@ -186,8 +185,7 @@ int nvram_set(nvram_handle_t *h, const char *name, const char *value)
 		 t && strcmp(t->name, name); prev = &t->next, t = *prev);
 
 	/* (Re)allocate tuple */
-	u = _nvram_realloc(h, t, name, value);
-	if (!u)
+	if (!(u = _nvram_realloc(h, t, name, value)))
 		return -12; /* -ENOMEM */
 
 	/* Value reallocated */
@@ -244,13 +242,17 @@ nvram_tuple_t * nvram_getall(nvram_handle_t *h)
 
 	for (i = 0; i < NVRAM_ARRAYSIZE(h->nvram_hash); i++) {
 		for (t = h->nvram_hash[i]; t; t = t->next) {
-			x = malloc(sizeof(*x) + strlen(t->name) + 1);
-			if(!x)
+			if( (x = (nvram_tuple_t *) malloc(sizeof(nvram_tuple_t))) != NULL )
+			{
+				x->name  = t->name;
+				x->value = t->value;
+				x->next  = l;
+				l = x;
+			}
+			else
+			{
 				break;
-			strcpy(x->name, t->name);
-			x->value = t->value;
-			x->next  = l;
-			l = x;
+			}
 		}
 	}
 
@@ -387,9 +389,10 @@ nvram_handle_t * nvram_open(const char *file, int rdonly)
 				close(fd);
 				return NULL;
 			}
-			h = calloc(1, sizeof(nvram_handle_t));
-			if(h)
+			else if( (h = malloc(sizeof(nvram_handle_t))) != NULL )
 			{
+				memset(h, 0, sizeof(nvram_handle_t));
+
 				h->fd     = fd;
 				h->mmap   = mmap_area;
 				h->length = nvram_part_size;
@@ -448,9 +451,11 @@ char * nvram_find_mtd(void)
 				sprintf(dev, "/dev/mtdblock%d", i);
 				if( stat(dev, &s) > -1 && (s.st_mode & S_IFBLK) )
 				{
-					path = strdup(dev);
-					if (path)
+					if( (path = (char *) malloc(strlen(dev)+1)) != NULL )
+					{
+						strncpy(path, dev, strlen(dev)+1);
 						break;
+					}
 				}
 			}
 		}

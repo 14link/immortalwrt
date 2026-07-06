@@ -21,6 +21,7 @@
 #include <linux/etherdevice.h>
 #include <linux/ethtool.h>
 #include <linux/platform_device.h>
+#include <linux/of_device.h>
 #include <linux/clk.h>
 #include <linux/of_net.h>
 #include <linux/of_mdio.h>
@@ -31,9 +32,9 @@
 #include <linux/bug.h>
 #include <linux/netfilter.h>
 #include <net/netfilter/nf_flow_table.h>
+#include <linux/of_gpio.h>
 #include <linux/gpio.h>
 #include <linux/gpio/consumer.h>
-#include <linux/version.h>
 
 #include <asm/mach-ralink/ralink_regs.h>
 
@@ -41,18 +42,7 @@
 #include "mdio.h"
 #include "ethtool.h"
 
-#if IS_ENABLED(CONFIG_NET_DSA)
-#include <net/dsa.h>
-#endif
-
-#if defined(CONFIG_SOC_MT7620)
-#define	DMA_FWD_REG		MT7620A_GDMA1_FWD_CFG
-#define	MAX_RX_LENGTH		2048
-#else
-#define DMA_FWD_REG		FE_GDMA1_FWD_CFG
 #define	MAX_RX_LENGTH		1536
-#endif
-
 #define FE_RX_ETH_HLEN		(VLAN_ETH_HLEN + VLAN_HLEN + ETH_FCS_LEN)
 #define FE_RX_HLEN		(NET_SKB_PAD + FE_RX_ETH_HLEN + NET_IP_ALIGN)
 #define DMA_DUMMY_DESC		0xffffffff
@@ -254,18 +244,10 @@ static void fe_clean_rx(struct fe_priv *priv)
 		ring->rx_dma = NULL;
 	}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,13,0)
-	void *vaddr = (void *)(ring->frag_cache.encoded_page & PAGE_MASK);
-	if (!vaddr)
-		return;
-
-	page = virt_to_page(vaddr);
-#else
 	if (!ring->frag_cache.va)
 	    return;
 
 	page = virt_to_page(ring->frag_cache.va);
-#endif
 	__page_frag_cache_drain(page, ring->frag_cache.pagecnt_bias);
 	memset(&ring->frag_cache, 0, sizeof(ring->frag_cache));
 }
@@ -790,41 +772,6 @@ err_out:
 	return -1;
 }
 
-#if IS_ENABLED(CONFIG_NET_DSA)
-#define MTK_HDR_LEN 4
-
-static netdev_features_t fe_features_check(struct sk_buff *skb,
-					   struct net_device *dev,
-					   netdev_features_t features)
-{
-	/* No point in doing any of this if neither checksum nor GSO are
-	 * being requested for this frame. We can rule out both by just
-	 * checking for CHECKSUM_PARTIAL
-	 */
-	if (skb->ip_summed != CHECKSUM_PARTIAL)
-		return features;
-
-	/* DSA tag might break existing offload checks as offload feature flags
-	 * are copied to slave ports and this driver does not use csum_start. */
-	if (netdev_uses_dsa(dev)) {
-		const struct dsa_device_ops *tag_ops = dev->dsa_ptr->tag_ops;
-
-		/* If tag is Mediatek, checksum should work */
-		if (tag_ops->proto == DSA_TAG_PROTO_MTK)
-			/* However, make sure that it is not stacking another
-			 * L2 protocol, possibly a second incompatible DSA tag
-			 * 802.1Q does not increase the mac header size because
-			 * it is embedded inside mediatek tag */
-			if (skb_mac_header_len(skb) <= ETH_HLEN + MTK_HDR_LEN)
-				return features;
-
-		features &= ~(NETIF_F_CSUM_MASK | NETIF_F_GSO_MASK);
-	}
-
-	return features;
-}
-#endif
-
 static inline int fe_skb_padto(struct sk_buff *skb, struct fe_priv *priv)
 {
 	unsigned int len;
@@ -1215,7 +1162,7 @@ void fe_fwd_config(struct fe_priv *priv)
 {
 	u32 fwd_cfg;
 
-	fwd_cfg = fe_r32(DMA_FWD_REG);
+	fwd_cfg = fe_r32(FE_GDMA1_FWD_CFG);
 
 	/* disable jumbo frame */
 	if (priv->flags & FE_FLAG_JUMBO_FRAME)
@@ -1224,19 +1171,19 @@ void fe_fwd_config(struct fe_priv *priv)
 	/* set unicast/multicast/broadcast frame to cpu */
 	fwd_cfg &= ~0xffff;
 
-	fe_w32(fwd_cfg, DMA_FWD_REG);
+	fe_w32(fwd_cfg, FE_GDMA1_FWD_CFG);
 }
 
 static void fe_rxcsum_config(bool enable)
 {
 	if (enable)
-		fe_w32(fe_r32(DMA_FWD_REG) | (FE_GDM1_ICS_EN |
+		fe_w32(fe_r32(FE_GDMA1_FWD_CFG) | (FE_GDM1_ICS_EN |
 					FE_GDM1_TCS_EN | FE_GDM1_UCS_EN),
-				DMA_FWD_REG);
+				FE_GDMA1_FWD_CFG);
 	else
-		fe_w32(fe_r32(DMA_FWD_REG) & ~(FE_GDM1_ICS_EN |
+		fe_w32(fe_r32(FE_GDMA1_FWD_CFG) & ~(FE_GDM1_ICS_EN |
 					FE_GDM1_TCS_EN | FE_GDM1_UCS_EN),
-				DMA_FWD_REG);
+				FE_GDMA1_FWD_CFG);
 }
 
 static void fe_txcsum_config(bool enable)
@@ -1400,6 +1347,7 @@ static void fe_reset_phy(struct fe_priv *priv)
 static int __init fe_init(struct net_device *dev)
 {
 	struct fe_priv *priv = netdev_priv(dev);
+	struct device_node *port;
 	int err;
 
 	fe_reset_fe(priv);
@@ -1412,12 +1360,19 @@ static int __init fe_init(struct net_device *dev)
 
 	fe_reset_phy(priv);
 
+	/* Set the MAC address if it is correct, if not use a random MAC address  */
+	if (of_get_ethdev_address(priv->dev->of_node, dev)) {
+		eth_hw_addr_random(dev);
+		dev_err(priv->dev, "generated random MAC address %pM\n",
+			dev->dev_addr);
+	}
+
 	err = fe_mdio_init(priv);
 	if (err)
 		return err;
 
 	if (priv->soc->port_init)
-		for_each_child_of_node_scoped(priv->dev->of_node, port)
+		for_each_child_of_node(priv->dev->of_node, port)
 			if (of_device_is_compatible(port, "mediatek,eth-port") &&
 			    of_device_is_available(port))
 				priv->soc->port_init(priv, port);
@@ -1491,11 +1446,12 @@ static int fe_change_mtu(struct net_device *dev, int new_mtu)
 		priv->rx_ring.frag_size = PAGE_SIZE;
 	priv->rx_ring.rx_buf_size = fe_max_buf_size(priv->rx_ring.frag_size);
 
-	if (netif_running(dev))
-		fe_stop(dev);
+	if (!netif_running(dev))
+		return 0;
 
+	fe_stop(dev);
 	if (!IS_ENABLED(CONFIG_SOC_MT7621)) {
-		fwd_cfg = fe_r32(DMA_FWD_REG);
+		fwd_cfg = fe_r32(FE_GDMA1_FWD_CFG);
 		if (new_mtu <= ETH_DATA_LEN) {
 			fwd_cfg &= ~FE_GDM1_JMB_EN;
 		} else {
@@ -1504,13 +1460,10 @@ static int fe_change_mtu(struct net_device *dev, int new_mtu)
 			fwd_cfg |= (DIV_ROUND_UP(frag_size, 1024) <<
 			FE_GDM1_JMB_LEN_SHIFT) | FE_GDM1_JMB_EN;
 		}
-		fe_w32(fwd_cfg, DMA_FWD_REG);
+		fe_w32(fwd_cfg, FE_GDMA1_FWD_CFG);
 	}
 
-	if (netif_running(dev))
-		return fe_open(dev);
-
-	return 0;
+	return fe_open(dev);
 }
 
 static const struct net_device_ops fe_netdev_ops = {
@@ -1529,9 +1482,6 @@ static const struct net_device_ops fe_netdev_ops = {
 	.ndo_vlan_rx_kill_vid	= fe_vlan_rx_kill_vid,
 #ifdef CONFIG_NET_POLL_CONTROLLER
 	.ndo_poll_controller	= fe_poll_controller,
-#endif
-#if IS_ENABLED(CONFIG_NET_DSA)
-	.ndo_features_check     = fe_features_check,
 #endif
 };
 
@@ -1572,6 +1522,7 @@ static void fe_pending_work(struct work_struct *work)
 
 static int fe_probe(struct platform_device *pdev)
 {
+	const struct of_device_id *match;
 	struct fe_soc_data *soc;
 	struct net_device *netdev;
 	struct fe_priv *priv;
@@ -1582,7 +1533,9 @@ static int fe_probe(struct platform_device *pdev)
 	if (err)
 		dev_err(&pdev->dev, "failed to reset device\n");
 
-	soc = (struct fe_soc_data *)of_device_get_match_data(&pdev->dev);
+	match = of_match_device(of_fe_match, &pdev->dev);
+	soc = (struct fe_soc_data *)match->data;
+
 	if (soc->reg_table)
 		fe_reg_table = soc->reg_table;
 	else
@@ -1602,20 +1555,11 @@ static int fe_probe(struct platform_device *pdev)
 	netdev->netdev_ops = &fe_netdev_ops;
 	netdev->base_addr = (unsigned long)fe_base;
 
-	/* Set the MAC address if it is correct, if not use a random MAC address  */
-	err = of_get_ethdev_address(pdev->dev.of_node, netdev);
-	if (err == -EPROBE_DEFER)
-		return err;
-
-	if (err) {
-		eth_hw_addr_random(netdev);
-		dev_err(&pdev->dev, "generated random MAC address %pM\n",
-			netdev->dev_addr);
-	}
-
 	netdev->irq = platform_get_irq(pdev, 0);
-	if (netdev->irq < 0)
+	if (netdev->irq < 0) {
+		dev_err(&pdev->dev, "no IRQ resource found\n");
 		return -ENXIO;
+	}
 
 	priv = netdev_priv(netdev);
 	spin_lock_init(&priv->page_lock);
@@ -1632,7 +1576,7 @@ static int fe_probe(struct platform_device *pdev)
 				  NETIF_F_HW_VLAN_CTAG_RX);
 	netdev->features |= netdev->hw_features;
 
-	if (IS_ENABLED(CONFIG_SOC_MT7620) || IS_ENABLED(CONFIG_SOC_MT7621))
+	if (IS_ENABLED(CONFIG_SOC_MT7621))
 		netdev->max_mtu = 2048;
 
 	/* fake rx vlan filter func. to support tx vlan offload func */
@@ -1694,7 +1638,7 @@ static int fe_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static void fe_remove(struct platform_device *pdev)
+static int fe_remove(struct platform_device *pdev)
 {
 	struct net_device *dev = platform_get_drvdata(pdev);
 	struct fe_priv *priv = netdev_priv(dev);
@@ -1704,6 +1648,8 @@ static void fe_remove(struct platform_device *pdev)
 	cancel_work_sync(&priv->pending_work);
 
 	platform_set_drvdata(pdev, NULL);
+
+	return 0;
 }
 
 static struct platform_driver fe_driver = {

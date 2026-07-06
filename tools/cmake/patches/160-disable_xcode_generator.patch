@@ -1,6 +1,6 @@
 --- a/Source/CMakeLists.txt
 +++ b/Source/CMakeLists.txt
-@@ -923,7 +923,7 @@ if(CMake_USE_XCOFF_PARSER)
+@@ -858,7 +858,7 @@ if(CMake_USE_XCOFF_PARSER)
  endif()
  
  # Xcode only works on Apple
@@ -11,8 +11,8 @@
      PRIVATE
 --- a/Source/cmake.cxx
 +++ b/Source/cmake.cxx
-@@ -144,7 +144,7 @@
- #  endif
+@@ -134,7 +134,7 @@
+ #  include "cmGlobalGhsMultiGenerator.h"
  #endif
  
 -#if defined(__APPLE__)

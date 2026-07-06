@@ -2,8 +2,7 @@
 enable_image_metadata_check() {
 	case "$(board_name)" in
 	gateworks,imx8m*|\
-	gw,imx8m*|\
-	kontron,imx8mp-bl-osm-s)
+	gw,imx8m*)
 		REQUIRE_IMAGE_METADATA=1
 		;;
 	esac
@@ -15,8 +14,7 @@ platform_check_image() {
 
 	case "$board" in
 	gateworks,imx8m*|\
-	gw,imx8m*|\
-	kontron,imx8mp-bl-osm-s)
+	gw,imx8m*)
 		return 0
 		;;
 	esac
@@ -30,8 +28,7 @@ platform_do_upgrade() {
 
 	case "$board" in
 	gateworks,imx8m*|\
-	gw,imx8m*|\
-	kontron,imx8mp-bl-osm-s)
+	gw,imx8m*)
 		export_bootdevice && export_partdevice diskdev 0 || {
 			echo "Unable to find root device."
 			return 1
@@ -48,8 +45,7 @@ platform_copy_config() {
 
 	case "$board" in
 	gateworks,imx8m*|\
-	gw,imx8m*|\
-	kontron,imx8mp-bl-osm-s)
+	gw,imx8m*)
 		export_partdevice partdev 1 && {
 			v "Storing $UPGRADE_BACKUP on /dev/$partdev..."
 			mount -o rw,noatime "/dev/$partdev" /mnt

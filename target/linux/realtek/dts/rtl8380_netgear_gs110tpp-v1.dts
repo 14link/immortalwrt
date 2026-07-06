@@ -54,14 +54,14 @@
 	status = "okay";
 };
 
-&mdio_bus0 {
-	PHY_C22(16, 16)
-	PHY_C22(17, 17)
+&mdio {
+	EXTERNAL_PHY(16)
+	EXTERNAL_PHY(17)
 };
 
 &switch0 {
-	ethernet-ports {
-		SWITCH_PORT_SDS(16, 9, 2, 0, qsgmii)
-		SWITCH_PORT_SDS(17, 10, 2, 1, qsgmii)
+	ports {
+		SWITCH_PORT(16, 9, qsgmii)
+		SWITCH_PORT(17, 10, qsgmii)
 	};
 };

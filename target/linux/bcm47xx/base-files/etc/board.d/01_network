@@ -196,7 +196,7 @@ configure_by_model() {
 
 
 model="$(cat /tmp/sysinfo/model)"
-boardtype="$(cat /tmp/sysinfo/boardtype)"
+boardtype="$(board_name)"
 
 case "$boardtype" in
 	*:*)

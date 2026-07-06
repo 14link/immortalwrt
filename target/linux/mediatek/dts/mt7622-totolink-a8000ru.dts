@@ -95,7 +95,7 @@
 		compatible = "mediatek,rtk-gsw";
 		mediatek,ethsys = <&ethsys>;
 		mediatek,mdio = <&mdio>;
-		reset-gpios = <&pio 54 GPIO_ACTIVE_LOW>;
+		mediatek,reset-pin = <&pio 54 0>;
 		status = "okay";
 	};
 };
@@ -107,9 +107,10 @@
 };
 
 &slot0 {
-	wmac1: wifi@0,0 {
-		compatible = "mediatek,mt76";
+	mt7615@0,0 {
 		reg = <0x0000 0 0 0 0>;
+		mediatek,mtd-eeprom = <&factory 0x5000>;
+		ieee80211-freq-limit = <5490000 6000000>;
 	};
 };
 
@@ -120,9 +121,10 @@
 };
 
 &slot1 {
-	wmac2: wifi@0,0 {
-		compatible = "mediatek,mt76";
+	mt7615@0,0 {
 		reg = <0x0000 0 0 0 0>;
+		mediatek,mtd-eeprom = <&factory 0x10000>;
+		ieee80211-freq-limit = <5000000 5490000>;
 	};
 };
 
@@ -280,7 +282,7 @@
 				read-only;
 			};
 
-			partition@1c0000 {
+			factory: partition@1c0000 {
 				label = "factory";
 				reg = <0x1c0000 0x40000>;
 				read-only;
@@ -290,24 +292,12 @@
 					#address-cells = <1>;
 					#size-cells = <1>;
 
-					eeprom_factory_0: eeprom@0 {
-						reg = <0x0 0x4da8>; /* actual length 0x400 */
-					};
-
 					macaddr_factory_24: macaddr@24 {
 						reg = <0x24 0x6>;
 					};
 
 					macaddr_factory_2a: macaddr@2a {
 						reg = <0x2a 0x6>;
-					};
-
-					eeprom_factory_5000: eeprom@5000 {
-						reg = <0x5000 0x4da8>;
-					};
-
-					eeprom_factory_10000: eeprom@10000 {
-						reg = <0x10000 0x4da8>;
 					};
 				};
 			};
@@ -354,23 +344,8 @@
 };
 
 &wmac {
-	status = "okay";
-
 	pinctrl-names = "default";
 	pinctrl-0 = <&epa_elna_pins>;
-
-	nvmem-cells = <&eeprom_factory_0>;
-	nvmem-cell-names = "eeprom";
-};
-
-&wmac1 {
-	nvmem-cells = <&eeprom_factory_5000>;
-	nvmem-cell-names = "eeprom";
-	ieee80211-freq-limit = <5490000 6000000>;
-};
-
-&wmac2 {
-	nvmem-cells = <&eeprom_factory_10000>;
-	nvmem-cell-names = "eeprom";
-	ieee80211-freq-limit = <5000000 5490000>;
+	mediatek,mtd-eeprom = <&factory 0x0>;
+	status = "okay";
 };

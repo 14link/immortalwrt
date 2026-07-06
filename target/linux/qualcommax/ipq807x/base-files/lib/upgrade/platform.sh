@@ -1,7 +1,7 @@
 PART_NAME=firmware
 REQUIRE_IMAGE_METADATA=1
 
-RAMFS_COPY_BIN='fw_printenv fw_setenv head seq'
+RAMFS_COPY_BIN='fw_printenv fw_setenv head'
 RAMFS_COPY_DATA='/etc/fw_env.config /var/lock/fw_printenv.lock'
 
 xiaomi_initramfs_prepare() {
@@ -165,30 +165,17 @@ platform_pre_upgrade() {
 
 platform_do_upgrade() {
 	case "$(board_name)" in
-	aliyun,ap8220)
-		active="$(fw_printenv -n active)"
-		if [ "$active" -eq "1" ]; then
-			CI_UBIPART="rootfs1"
-		else
-			CI_UBIPART="rootfs2"
-		fi
-		nand_do_upgrade "$1"
-		;;
 	arcadyan,aw1000|\
 	cmcc,rm2-6|\
 	compex,wpq873|\
 	dynalink,dl-wrx36|\
 	edimax,cax1800|\
 	netgear,rax120v2|\
-	netgear,rbr750|\
-	netgear,rbs750|\
 	netgear,sxr80|\
 	netgear,sxs80|\
 	netgear,wax218|\
 	netgear,wax620|\
-	netgear,wax630|\
-	zyxel,nwa110ax|\
-	zyxel,nwa210ax)
+	netgear,wax630)
 		nand_do_upgrade "$1"
 		;;
 	asus,rt-ax89x)
@@ -200,7 +187,6 @@ platform_do_upgrade() {
 	buffalo,wxr-5950ax12)
 		CI_KERN_UBIPART="rootfs"
 		CI_ROOT_UBIPART="user_property"
-		CI_DATA_UBIPART="user_property"
 		buffalo_upgrade_prepare
 		nand_do_flash_file "$1" || nand_do_upgrade_failed
 		nand_do_restore_config || nand_do_upgrade_failed
@@ -259,7 +245,6 @@ platform_do_upgrade() {
 		# Kernel and rootfs are placed in 2 different UBI
 		CI_KERN_UBIPART="ubi_kernel"
 		CI_ROOT_UBIPART="rootfs"
-		CI_DATA_UBIPART="rootfs"
 		nand_do_upgrade "$1"
 		;;
 	redmi,ax6-stock|\
@@ -296,12 +281,6 @@ platform_do_upgrade() {
 		CI_DATAPART="rootfs_data"
 		emmc_do_upgrade "$1"
 		;;
-	tcl,linkhub-hh500v)
-		tcl_upgrade_prepare
-		nand_do_upgrade "$1"
-		;;
-	tplink,deco-x80-5g|\
-	tplink,eap620hd-v1|\
 	tplink,eap660hd-v1)
 		tplink_do_upgrade "$1"
 		;;
@@ -332,7 +311,6 @@ platform_do_upgrade() {
 	zte,mf269)
 		CI_KERN_UBIPART="ubi_kernel"
 		CI_ROOT_UBIPART="rootfs"
-		CI_DATA_UBIPART="rootfs"
 		nand_do_upgrade "$1"
 		;;
 	zte,mf269-stock)
