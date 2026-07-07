@@ -13,7 +13,6 @@
 		led-failsafe = &led_power_amber;
 		led-running = &led_power_green;
 		led-upgrade = &led_power_amber;
-		label-mac-device = &eth0;
 	};
 
 	leds {

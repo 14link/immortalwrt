@@ -688,7 +688,7 @@ define Device/buffalo_wzr-hp-g300nh
   SOC := ar9132
   BUFFALO_PRODUCT := WZR-HP-G300NH
   BUFFALO_HWVER := 1
-  DEVICE_PACKAGES := kmod-gpio-line-mux kmod-mux-gpio kmod-usb2 kmod-usb-ledtrig-usbport
+  DEVICE_PACKAGES := kmod-gpio-cascade kmod-mux-gpio kmod-usb2 kmod-usb-ledtrig-usbport
   BLOCKSIZE := 128k
   IMAGE_SIZE := 32128k
   SUPPORTED_DEVICES += wzr-hp-g300nh
@@ -1318,27 +1318,6 @@ define Device/dlink_dir-842-c3
 endef
 TARGET_DEVICES += dlink_dir-842-c3
 
-define Device/dragino2_common
-  SOC := ar9330
-  DEVICE_VENDOR := Dragino
-  DEVICE_PACKAGES := kmod-usb-chipidea2
-  IMAGE_SIZE := 16000k
-  SUPPORTED_DEVICES += dragino2
-endef
-
-define Device/dragino_lps8
-  $(Device/dragino2_common)
-  DEVICE_MODEL := LPS8
-  DEVICE_PACKAGES += kmod-spi-gpio kmod-spi-dev
-endef
-TARGET_DEVICES += dragino_lps8
-
-define Device/dragino_ms14
-  $(Device/dragino2_common)
-  DEVICE_MODEL := MS14
-endef
-TARGET_DEVICES += dragino_ms14
-
 define Device/elecom_wab
   DEVICE_VENDOR := ELECOM
   IMAGE_SIZE := 14336k
@@ -1661,6 +1640,7 @@ define Device/fortinet_fap_common
 	check-size | pad-to $$$$(IMAGE_SIZE) | \
 	append-loader-okli-uimage $(1) | pad-to 10944k | \
 	gzip-filename $$$$(FACTORY_IMG_NAME)
+  DEFAULT := n
 endef
 
 define Device/fortinet_fap-220-b

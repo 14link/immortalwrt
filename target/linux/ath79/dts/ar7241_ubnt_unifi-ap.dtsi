@@ -8,7 +8,6 @@
 		led-failsafe = &led_dome_green;
 		led-running = &led_dome_green;
 		led-upgrade = &led_dome_green;
-		label-mac-device = &eth0;
 	};
 
 	leds {

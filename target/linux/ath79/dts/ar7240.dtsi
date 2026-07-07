@@ -90,7 +90,6 @@
 	reset-names = "mac";
 
 	phy-mode = "gmii";
-	builtin-switch;
 
 	fixed-link {
 		speed = <1000>;

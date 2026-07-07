@@ -88,7 +88,7 @@ static int mtdsplit_parse_minor(struct mtd_info *master,
 	if (err)
 		return err;
 
-	parts = kcalloc(MINOR_NR_PARTS, sizeof(*parts), GFP_KERNEL);
+	parts = kzalloc(MINOR_NR_PARTS * sizeof(*parts), GFP_KERNEL);
 	if (!parts)
 		return -ENOMEM;
 
@@ -118,4 +118,11 @@ static struct mtd_part_parser mtdsplit_minor_parser = {
 	.type = MTD_PARSER_TYPE_FIRMWARE,
 };
 
-module_mtd_part_parser(mtdsplit_minor_parser);
+static int __init mtdsplit_minor_init(void)
+{
+	register_mtd_parser(&mtdsplit_minor_parser);
+
+	return 0;
+}
+
+subsys_initcall(mtdsplit_minor_init);

@@ -297,11 +297,11 @@
 						#size-cells = <1>;
 
 						eeprom0: eeprom@0 {
-							reg = <0x0 0xe00>;
+							reg = <0x0 0x5000>;
 						};
 
 						eeprom1: eeprom@5000 {
-							reg = <0x5000 0xe00>;
+							reg = <0x5000 0x5000>;
 						};
 					};
 				};
@@ -330,17 +330,13 @@
 };
 
 &slot0 {
-	wifi@0,0 {
-		compatible = "mediatek,mt76";
-		reg = <0x0000 0 0 0 0>;
-
-		nvmem-cells = <&eeprom0>;
-		nvmem-cell-names = "eeprom";
-
-		ieee80211-freq-limit = <2400000 5330000>;
-
+	mt7915@0,0 {
 		#address-cells = <1>;
 		#size-cells = <0>;
+		reg = <0x0000 0 0 0 0>;
+		nvmem-cells = <&eeprom0>;
+		nvmem-cell-names = "eeprom";
+		ieee80211-freq-limit = <2400000 5330000>;
 
 		band@0 {
 			/* 2.4 GHz */
@@ -365,11 +361,9 @@
 };
 
 &slot1 {
-	/* upper 5 GHz */
-	wifi@0,0 {
-		compatible = "mediatek,mt76";
+	mt7915@0,0 {
+		/* upper 5 GHz */
 		reg = <0x0000 0 0 0 0>;
-
 		nvmem-cells = <&eeprom1>, <&macaddr 0xf>;
 		nvmem-cell-names = "eeprom", "mac-address";
 		ieee80211-freq-limit = <5490000 5835000>;

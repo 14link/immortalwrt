@@ -78,7 +78,7 @@ Signed-off-by: Robert Marko <robert.marko@sartura.hr>
  		if (dsa_is_cpu_port(priv->ds, i))
 --- /dev/null
 +++ b/drivers/net/dsa/qca/qca8k-ipq4019.c
-@@ -0,0 +1,948 @@
+@@ -0,0 +1,949 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Copyright (C) 2009 Felix Fietkau <nbd@nbd.name>
@@ -96,6 +96,7 @@ Signed-off-by: Robert Marko <robert.marko@sartura.hr>
 +#include <net/dsa.h>
 +#include <linux/of_net.h>
 +#include <linux/of_mdio.h>
++#include <linux/of_platform.h>
 +#include <linux/platform_device.h>
 +#include <linux/mdio.h>
 +#include <linux/phylink.h>
@@ -557,7 +558,7 @@ Signed-off-by: Robert Marko <robert.marko@sartura.hr>
 +qca8k_do_dsa_sw_ports_self_test(struct qca8k_priv *priv, int parallel_test)
 +{
 +	struct device_node *dn = priv->dev->of_node;
-+	struct device_node *ports;
++	struct device_node *ports, *port;
 +	struct device_node *phy_dn;
 +	struct phy_device *phy;
 +	int reg, err = 0, test_phase;
@@ -575,7 +576,7 @@ Signed-off-by: Robert Marko <robert.marko@sartura.hr>
 +			if (err)
 +				goto error;
 +		}
-+		for_each_available_child_of_node_scoped(ports, port) {
++		for_each_available_child_of_node(ports, port) {
 +			err = of_property_read_u32(port, "reg", &reg);
 +			if (err)
 +				goto error;
@@ -1048,7 +1049,7 @@ Signed-off-by: Robert Marko <robert.marko@sartura.hr>
  
  #define QCA8K_QCA832X_MIB_COUNT				39
  #define QCA8K_QCA833X_MIB_COUNT				41
-@@ -266,6 +270,7 @@
+@@ -265,6 +269,7 @@
  #define   QCA8K_PORT_LOOKUP_STATE_LEARNING		QCA8K_PORT_LOOKUP_STATE(0x3)
  #define   QCA8K_PORT_LOOKUP_STATE_FORWARD		QCA8K_PORT_LOOKUP_STATE(0x4)
  #define   QCA8K_PORT_LOOKUP_LEARN			BIT(20)
@@ -1056,7 +1057,7 @@ Signed-off-by: Robert Marko <robert.marko@sartura.hr>
  #define   QCA8K_PORT_LOOKUP_ING_MIRROR_EN		BIT(25)
  
  #define QCA8K_REG_GOL_TRUNK_CTRL0			0x700
-@@ -342,6 +347,53 @@
+@@ -341,6 +346,53 @@
  #define MII_ATH_MMD_ADDR				0x0d
  #define MII_ATH_MMD_DATA				0x0e
  
@@ -1110,7 +1111,7 @@ Signed-off-by: Robert Marko <robert.marko@sartura.hr>
  enum {
  	QCA8K_PORT_SPEED_10M = 0,
  	QCA8K_PORT_SPEED_100M = 1,
-@@ -469,6 +521,10 @@ struct qca8k_priv {
+@@ -468,6 +520,10 @@ struct qca8k_priv {
  	struct qca8k_pcs pcs_port_6;
  	const struct qca8k_match_data *info;
  	struct qca8k_led ports_led[QCA8K_LED_COUNT];

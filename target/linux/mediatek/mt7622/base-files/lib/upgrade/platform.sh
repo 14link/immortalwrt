@@ -17,13 +17,11 @@ platform_do_upgrade() {
 		fit_do_upgrade "$1"
 		;;
 	buffalo,wsr-2533dhp2|\
-	buffalo,wsr-2533dhp3|\
 	buffalo,wsr-3200ax4s)
 		buffalo_do_upgrade "$1"
 		;;
 	dlink,eagle-pro-ai-m32-a1|\
 	dlink,eagle-pro-ai-r32-a1|\
-	elecom,wrc-g01|\
 	elecom,wrc-x3200gst3|\
 	mediatek,mt7622-rfb1-ubi|\
 	netgear,wax206|\
@@ -59,13 +57,11 @@ platform_check_image() {
 
 	case "$board" in
 	buffalo,wsr-2533dhp2|\
-	buffalo,wsr-2533dhp3|\
 	buffalo,wsr-3200ax4s)
 		buffalo_check_image "$board" "$magic" "$1" || return 1
 		;;
 	dlink,eagle-pro-ai-m32-a1|\
 	dlink,eagle-pro-ai-r32-a1|\
-	elecom,wrc-g01|\
 	elecom,wrc-x3200gst3|\
 	mediatek,mt7622-rfb1-ubi|\
 	netgear,wax206|\

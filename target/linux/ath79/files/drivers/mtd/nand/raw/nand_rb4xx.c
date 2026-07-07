@@ -18,6 +18,7 @@
 #include <linux/mtd/rawnand.h>
 #include <linux/gpio/consumer.h>
 #include <linux/module.h>
+#include <linux/of_device.h>
 #include <linux/version.h>
 
 #include <mfd/rb4xx-cpld.h>
@@ -222,8 +223,8 @@ static void rb4xx_nand_remove(struct platform_device *pdev)
 }
 
 static struct platform_driver rb4xx_nand_driver = {
-	.probe  = rb4xx_nand_probe,
-	.remove = rb4xx_nand_remove,
+	.probe = rb4xx_nand_probe,
+	.remove_new = rb4xx_nand_remove,
 	.driver = {
 		.name = "rb4xx-nand",
 	},

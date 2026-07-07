@@ -11,6 +11,7 @@
 #include <linux/led-class-multicolor.h>
 #include <linux/leds.h>
 #include <linux/module.h>
+#include <linux/of_device.h>
 #include <linux/property.h>
 #include <linux/i2c.h>
 #include <linux/mutex.h>
@@ -121,27 +122,30 @@ static int gca230718_probe(struct i2c_client *client)
 
 	i2c_set_clientdata(client, priv);
 
-	device_for_each_child_node_scoped(&client->dev, ledNode) {
-		const char *lname = fwnode_get_name(ledNode);
+	struct device_node *ledNode;
+	for_each_child_of_node(client->dev.of_node, ledNode) {
 		u32 regValue = 0;
-		if (fwnode_property_read_u32(ledNode, "reg", &regValue))
-			pr_info("Missing entry \"reg\" in node %s\n", lname);
+		if (of_property_read_u32(ledNode, "reg", &regValue))
+			pr_info("Missing entry \"reg\" in node %s\n",
+				ledNode->name);
 		else if (regValue >= GCA230718_MAX_LEDS)
 			pr_info("Invalid entry \"reg\" in node %s (%u)\n",
-				lname, regValue);
+				ledNode->name, regValue);
 		else {
 			struct led_classdev *ledClassDev =
 				&(priv->leds[regValue].ledClassDev);
 			struct led_init_data init_data = {};
 
 			priv->leds[regValue].client = client;
-			init_data.fwnode = fwnode_handle_get(ledNode);
+			init_data.fwnode = of_fwnode_handle(ledNode);
 
 			pr_info("Creating LED for node %s: reg=%u\n",
-				lname, regValue);
+				ledNode->name, regValue);
 
-			ledClassDev->name = lname;
-			fwnode_property_read_string(ledNode, "label", &ledClassDev->name);
+			ledClassDev->name =
+				of_get_property(ledNode, "label", NULL);
+			if (!ledClassDev->name)
+				ledClassDev->name = ledNode->name;
 
 			ledClassDev->brightness = LED_OFF;
 			ledClassDev->max_brightness = LED_FULL;

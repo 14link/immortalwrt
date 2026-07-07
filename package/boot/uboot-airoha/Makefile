@@ -16,32 +16,14 @@ define U-Boot/Default
   LZMA_COMPRESS:=1
 endef
 
-define U-Boot/an7581_gemtek_w1700k
-  NAME:=Gemtek W1700K (UBI)
-  UBOOT_CONFIG:=an7581_w1700k
-  BUILD_DEVICES:=gemtek_w1700k-ubi
-  BUILD_SUBTARGET:=an7581
-  UBOOT_IMAGE:=u-boot.bin
-endef
-
-define U-Boot/an7581_nokia_valyrian
-  NAME:=Nokia Valyrian
-  UBOOT_CONFIG:=an7581_nokia_valyrian
-  BUILD_DEVICES:=nokia_valyrian
-  BUILD_SUBTARGET:=an7581
+define U-Boot/en7523_rfb
+  NAME:=EN7523 Reference Board
+  UBOOT_CONFIG:=en7523_evb
+  BUILD_DEVICES:=airoha_en7523-evb
+  BUILD_SUBTARGET:=en7523
   UBOOT_IMAGE:=u-boot.fip
-  BL2_IMAGE:=an7581-bl2.bin
-  BL31_IMAGE:=an7581-bl31.bin
-endef
-
-define U-Boot/an7581_nokia_xg-040g-md
-  NAME:=Nokia XG-040G-MD
-  UBOOT_CONFIG:=an7581_nokia_xg-040g-md
-  BUILD_DEVICES:=nokia_xg-040g-md-ubi
-  BUILD_SUBTARGET:=an7581
-  UBOOT_IMAGE:=u-boot.fip
-  BL2_IMAGE:=an7581-bl2.bin
-  BL31_IMAGE:=an7581-bl31.bin
+  BL2_IMAGE:=en7523-bl2.bin
+  BL31_IMAGE:=en7523-bl31.bin
 endef
 
 define U-Boot/an7581_rfb
@@ -64,23 +46,19 @@ define U-Boot/an7583_rfb
   BL31_IMAGE:=an7583-bl31.bin
 endef
 
-define U-Boot/en7523_rfb
-  NAME:=EN7523 Reference Board
-  UBOOT_CONFIG:=en7523_evb
-  BUILD_DEVICES:=airoha_en7523-evb
-  BUILD_SUBTARGET:=en7523
-  UBOOT_IMAGE:=u-boot.fip
-  BL2_IMAGE:=en7523-bl2.bin
-  BL31_IMAGE:=en7523-bl31.bin
+define U-Boot/an7581_gemtek_w1700k
+  NAME:=Gemtek W1700K (UBI)
+  UBOOT_CONFIG:=an7581_w1700k
+  BUILD_DEVICES:=gemtek_w1700k-ubi
+  BUILD_SUBTARGET:=an7581
+  UBOOT_IMAGE:=u-boot.bin
 endef
 
 UBOOT_TARGETS := \
-	an7581_gemtek_w1700k \
-	an7581_nokia_valyrian \
-	an7581_nokia_xg-040g-md \
+	en7523_rfb \
 	an7581_rfb \
 	an7583_rfb \
-	en7523_rfb
+	an7581_gemtek_w1700k
 
 UBOOT_CUSTOMIZE_CONFIG := \
 	--disable TOOLS_KWBIMAGE \

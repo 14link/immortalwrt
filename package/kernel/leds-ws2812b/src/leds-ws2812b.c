@@ -13,6 +13,7 @@
 #include <linux/led-class-multicolor.h>
 #include <linux/leds.h>
 #include <linux/module.h>
+#include <linux/of_device.h>
 #include <linux/property.h>
 #include <linux/spi/spi.h>
 #include <linux/mutex.h>
@@ -105,6 +106,7 @@ static int ws2812b_probe(struct spi_device *spi)
 	struct device *dev = &spi->dev;
 	int cur_led = 0;
 	struct ws2812b_priv *priv;
+	struct fwnode_handle *led_node;
 	int num_leds, i, cnt, ret;
 
 	num_leds = device_get_child_node_count(dev);
@@ -129,9 +131,9 @@ static int ws2812b_probe(struct spi_device *spi)
 	priv->num_leds = num_leds;
 	priv->spi = spi;
 
-	device_for_each_child_node_scoped(dev, led_node) {
+	device_for_each_child_node(dev, led_node) {
 		struct led_init_data init_data = {
-			.fwnode = fwnode_handle_get(led_node),
+			.fwnode = led_node,
 		};
 		/* WS2812B LEDs usually come with GRB color */
 		u32 color_idx[WS2812B_NUM_COLORS] = {

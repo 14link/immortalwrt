@@ -120,6 +120,8 @@
 
 			nvmem-layout {
 				compatible = "ascii-eq-delim-env";
+				#address-cells = <1>;
+				#size-cells = <1>;
 
 				hw_mac_addr: hw_mac_addr {
 					compatible = "mac-base";
@@ -220,10 +222,6 @@
 			label = "lan4";
 		};
 	};
-};
-
-&usb_phy {
-	status = "disabled";
 };
 
 &xhci {

@@ -95,7 +95,7 @@ static int mtdsplit_parse_owrt_prolog(struct mtd_info *master,
 	if (ret)
 		return ret;
 
-	parts = kcalloc(OWRT_PROLOG_NR_PARTS, sizeof(*parts), GFP_KERNEL);
+	parts = kzalloc(OWRT_PROLOG_NR_PARTS * sizeof(*parts), GFP_KERNEL);
 	if (!parts)
 		return -ENOMEM;
 
@@ -124,4 +124,11 @@ static struct mtd_part_parser mtdsplit_owrt_prolog_parser = {
 	.type = MTD_PARSER_TYPE_FIRMWARE,
 };
 
-module_mtd_part_parser(mtdsplit_owrt_prolog_parser);
+static int __init mtdsplit_owrt_prolog_init(void)
+{
+	register_mtd_parser(&mtdsplit_owrt_prolog_parser);
+
+	return 0;
+}
+
+subsys_initcall(mtdsplit_owrt_prolog_init);

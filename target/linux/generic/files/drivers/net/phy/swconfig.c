@@ -1060,10 +1060,12 @@ static struct genl_family switch_fam = {
 static void
 of_switch_load_portmap(struct switch_dev *dev)
 {
+	struct device_node *port;
+
 	if (!dev->of_node)
 		return;
 
-	for_each_child_of_node_scoped(dev->of_node, port) {
+	for_each_child_of_node(dev->of_node, port) {
 		const __be32 *prop;
 		const char *segment;
 		int size, phys;
@@ -1114,8 +1116,7 @@ register_switch(struct switch_dev *dev, struct net_device *netdev)
 		if (!dev->alias)
 			dev->alias = netdev->name;
 	}
-	if (WARN_ON(!dev->alias))
-		return -EINVAL;
+	BUG_ON(!dev->alias);
 
 	/* Make sure swdev_id doesn't overflow */
 	if (swdev_id == INT_MAX) {
@@ -1123,10 +1124,12 @@ register_switch(struct switch_dev *dev, struct net_device *netdev)
 	}
 
 	if (dev->ports > 0) {
-		dev->portbuf = kcalloc(dev->ports, sizeof(struct switch_port), GFP_KERNEL);
+		dev->portbuf = kzalloc(sizeof(struct switch_port) *
+				dev->ports, GFP_KERNEL);
 		if (!dev->portbuf)
 			return -ENOMEM;
-		dev->portmap = kcalloc(dev->ports, sizeof(struct switch_portmap), GFP_KERNEL);
+		dev->portmap = kzalloc(sizeof(struct switch_portmap) *
+				dev->ports, GFP_KERNEL);
 		if (!dev->portmap) {
 			kfree(dev->portbuf);
 			return -ENOMEM;

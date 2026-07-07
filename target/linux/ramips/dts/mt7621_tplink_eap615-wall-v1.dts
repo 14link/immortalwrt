@@ -59,6 +59,10 @@
 	};
 };
 
+&ethernet {
+	reg = <0x1e100000 0xe000>;
+};
+
 &spi0 {
 	status = "okay";
 

@@ -29,16 +29,10 @@ define Package/arm-trusted-firmware-tools
   BUILDONLY:=1
 endef
 
-ifeq ($(shell uname -s),Linux)
-	HOST_MUSL_FLAG:=$(shell [ "$$(2>&1 ldd --version | head -n 1 | cut -d ' ' -f1)" = "musl" ] && echo " -D__MUSL__")
-else
-	HOST_MUSL_FLAG:=
-endif
-
 define Host/Compile
 	$(MAKE) -C \
 		$(HOST_BUILD_DIR)/tools/fiptool \
-		CPPFLAGS="$(HOST_CFLAGS)$(HOST_MUSL_FLAG)" \
+		CPPFLAGS="$(HOST_CFLAGS)" \
 		LDFLAGS="$(HOST_LDFLAGS)" \
 		OPENSSL_DIR="$(STAGING_DIR_HOST)"
 endef

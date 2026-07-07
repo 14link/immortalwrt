@@ -83,9 +83,7 @@ case "$board" in
 	cudy,ap3000wall-v1|\
 	cudy,ap3000-v1|\
 	cudy,m3000-v1|\
-	cudy,m3000-v1-ubootmod|\
 	cudy,m3000-v2-yt8821|\
-	cudy,m3000-v2-yt8821-ubootmod|\
 	cudy,re3000-v1|\
 	cudy,tr3000-256mb-v1|\
 	cudy,tr3000-v1|\
@@ -118,11 +116,6 @@ case "$board" in
 		addr=$(mmc_get_mac_binary factory 0x04)
 		[ "$PHYNBR" = "0" ] && echo "$addr" > /sys${DEVPATH}/macaddress
 		[ "$PHYNBR" = "1" ] && macaddr_add $addr 1 > /sys${DEVPATH}/macaddress
-		;;
-	globitel,bt-r320)
-		addr=$(mmc_get_mac_binary factory 0x4)
-		[ "$PHYNBR" = "0" ] && echo "$addr" > /sys${DEVPATH}/macaddress
-		[ "$PHYNBR" = "1" ] && macaddr_setbit_la "$addr" > /sys${DEVPATH}/macaddress
 		;;
 	h3c,magic-nx30-pro)
 		addr=$(mtd_get_mac_ascii pdt_data_1 ethaddr)
@@ -221,15 +214,15 @@ case "$board" in
 		[ "$PHYNBR" = "0" ] && macaddr_add $addr 2 > /sys${DEVPATH}/macaddress
 		[ "$PHYNBR" = "1" ] && macaddr_add $addr 3 > /sys${DEVPATH}/macaddress
 		;;
+	ruijie,rg-x60)
+		[ "$PHYNBR" = "1" ] && macaddr_setbit_la $(macaddr_add $(get_mac_label) 0xb00002) > /sys${DEVPATH}/macaddress
+		;;
 	routerich,ax3000|\
 	routerich,ax3000-ubootmod|\
 	zbtlink,zbt-z8102ax|\
 	zbtlink,zbt-z8102ax-v2)
 		addr=$(mtd_get_mac_binary "Factory" 0x4)
 		[ "$PHYNBR" = "1" ] && macaddr_add $addr 1 > /sys${DEVPATH}/macaddress
-		;;
-	ruijie,rg-x60)
-		[ "$PHYNBR" = "1" ] && macaddr_setbit_la $(macaddr_add $(get_mac_label) 0xb00002) > /sys${DEVPATH}/macaddress
 		;;
 	tplink,eap683-lr|\
 	tplink,f65-v1)

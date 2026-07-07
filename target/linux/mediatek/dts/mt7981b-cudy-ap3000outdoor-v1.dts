@@ -141,7 +141,7 @@
 				read-only;
 			};
 
-			partition@180000 {
+			factory: partition@180000 {
 				label = "Factory";
 				reg = <0x180000 0x0200000>;
 				read-only;
@@ -201,7 +201,6 @@
 
 &wifi {
 	status = "okay";
-
 	nvmem-cells = <&eeprom_factory_0>;
 	nvmem-cell-names = "eeprom";
 };

@@ -157,7 +157,7 @@
 
 		led {
 			led-sources = <1>;
-			led-active-low;
+			led-actice-low;
 		};
 	};
 };

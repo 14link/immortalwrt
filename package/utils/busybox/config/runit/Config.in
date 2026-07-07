@@ -17,8 +17,7 @@ config BUSYBOX_CONFIG_SETUIDGID
 	bool "setuidgid (4.2 kb)"
 	default BUSYBOX_DEFAULT_SETUIDGID
 	help
-	Sets UID and GID to those of the given account, and execs
-	specified program.
+	Sets soft resource limits as specified by options
 
 config BUSYBOX_CONFIG_ENVUIDGID
 	bool "envuidgid (4.1 kb)"

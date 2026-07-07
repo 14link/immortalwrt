@@ -50,7 +50,7 @@
 
 		user {
 			label = "user";
-			linux,code = <KEY_WPS_BUTTON>;
+			linux,code = <BTN_0>;
 			gpios = <&pio 0 GPIO_ACTIVE_LOW>;
 		};
 

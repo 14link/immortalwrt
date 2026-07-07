@@ -13,6 +13,7 @@
 		led-failsafe = &led_debug;
 		led-running = &led_debug;
 		led-upgrade = &led_debug;
+		label-mac-device = &eth0;
 	};
 
 	leds {

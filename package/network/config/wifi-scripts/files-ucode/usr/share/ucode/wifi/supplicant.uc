@@ -60,7 +60,7 @@ export function ratelist(rates) {
 function setup_sta(data, config) {
 	iface.parse_encryption(config);
 
-	if (config.auth_type in [ 'sae', 'owe', 'eap2', 'eap192', 'dpp' ])
+	if (config.auth_type in [ 'sae', 'owe', 'eap2', 'eap192' ])
 		config.ieee80211w = 2;
 	else if (config.auth_type in [ 'psk-sae' ] && !config.ieee80211w)
 		config.ieee80211w = 1;
@@ -121,10 +121,6 @@ function setup_sta(data, config) {
 		break;
 
 	case 'owe':
-		iface.wpa_key_mgmt(config);
-		break;
-
-	case 'dpp':
 		iface.wpa_key_mgmt(config);
 		break;
 
@@ -211,7 +207,6 @@ function setup_sta(data, config) {
 		'ht40', 'beacon_int', 'ieee80211w', 'rates', 'mesh_basic_rates', 'mcast_rate',
 		'altsubject_match', 'domain_match', 'domain_suffix_match',
 		'bssid_blacklist', 'bssid_whitelist', 'erp', 'eap', 'phase2',
-		'dpp_connector', 'dpp_csign', 'dpp_netaccesskey',
 	]);
 }
 

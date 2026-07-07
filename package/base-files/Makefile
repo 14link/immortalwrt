@@ -43,10 +43,9 @@ define Package/base-files
 	+netifd +libc +jsonfilter +SIGNED_PACKAGES:usign +SIGNED_PACKAGES:openwrt-keyring \
 	+NAND_SUPPORT:ubi-utils +fstools +fwtool \
 	+SELINUX:procd-selinux +!SELINUX:procd +USE_SECCOMP:procd-seccomp \
-	+SELINUX:busybox-selinux +!SELINUX:busybox \
-	+ucode +ucode-mod-fs +ucode-mod-digest
+	+SELINUX:busybox-selinux +!SELINUX:busybox
   TITLE:=Base filesystem for OpenWrt
-  URL:=https://openwrt.org/
+  URL:=http://openwrt.org/
   VERSION:=$(PKG_RELEASE)~$(lastword $(subst -, ,$(REVISION)))
 endef
 
@@ -54,6 +53,7 @@ define Package/base-files/conffiles
 /etc/config/
 /etc/config/network
 /etc/config/system
+/etc/dropbear/
 /etc/ethers
 /etc/group
 /etc/hosts
@@ -265,16 +265,6 @@ else
 	$(if $(CONFIG_IPK_FILES_CHECKSUMS),, \
 		rm -f $(1)/sbin/pkg_check)
 endif
-$(if $(CONFIG_TARGET_BUTTON_CUSTOMIZATION_FAILSAFE_DISABLED), \
-	rm -f $(1)/etc/rc.button/failsafe)
-$(if $(CONFIG_TARGET_BUTTON_CUSTOMIZATION_POWER_DISABLED), \
-	rm -f $(1)/etc/rc.button/power)
-$(if $(CONFIG_TARGET_BUTTON_CUSTOMIZATION_REBOOT_DISABLED), \
-	rm -f $(1)/etc/rc.button/reboot)
-$(if $(CONFIG_TARGET_BUTTON_CUSTOMIZATION_RESET_DISABLED), \
-	rm -f $(1)/etc/rc.button/reset)
-$(if $(CONFIG_TARGET_BUTTON_CUSTOMIZATION_RF_KILL_DISABLED), \
-	rm -f $(1)/etc/rc.button/rfkill)
 endef
 
 ifneq ($(DUMP),1)

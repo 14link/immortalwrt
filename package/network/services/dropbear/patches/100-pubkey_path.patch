@@ -43,7 +43,7 @@
  /* process a pubkey auth request, sending success or failure message as
   * appropriate */
  void svr_auth_pubkey(int valid_user) {
-@@ -459,16 +492,22 @@ out:
+@@ -450,16 +483,22 @@ out:
  static char *authorized_keys_filepath() {
  	size_t len = 0;
  	char *pathname = NULL, *dir = NULL;
@@ -69,7 +69,7 @@
  	m_free(dir);
  	return pathname;
  }
-@@ -572,11 +611,23 @@ out:
+@@ -563,11 +602,23 @@ out:
   * When this path is inside the user's home dir it checks up to and including
   * the home dir, otherwise it checks every path component. */
  static int checkpubkeyperms() {

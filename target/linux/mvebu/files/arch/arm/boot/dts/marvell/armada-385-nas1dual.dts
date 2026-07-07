@@ -281,7 +281,6 @@
 				partition@600000 {
 					reg = <0x00600000 0x038c0000>;
 					label = "rootfs";
-					linux,rootfs;
 				};
 			};
 

@@ -45,6 +45,7 @@
 #include <linux/modeversions>
 #endif
 
+#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/proc_fs.h>
@@ -1797,7 +1798,7 @@ static int gcm_aes_decrypt(struct aead_request *req)
 
     //crypt and hash
     while ((nbytes = dec_bytes = walk.nbytes) && (walk.nbytes >= AES_BLOCK_SIZE)) {
-        const u8 *temp;
+        u8 *temp;
         dec_bytes -= (nbytes % AES_BLOCK_SIZE);
         temp = walk.src.virt.addr;
         while (dec_bytes) {

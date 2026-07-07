@@ -25,10 +25,6 @@ mediatek_setup_interfaces()
 	zbtlink,zbt-z8103ax-c)
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" eth1
 		;;
-	zbtlink,zbt-z8803be)
-		ucidef_set_interfaces_lan_wan "lan0 lan1 lan2" eth1
-		ucidef_set_interface "wan_sfp" device "eth2" protocol "none"
-		;;
 	acelink,ew-7886cax|\
 	tplink,eap683-lr)
 		ucidef_set_interface_lan "eth0" "dhcp"
@@ -51,7 +47,6 @@ mediatek_setup_interfaces()
 	asus,rt-ax59u|\
 	asus,zenwifi-bt8|\
 	asus,zenwifi-bt8-ubootmod|\
-	buffalo,wsr-3000ax4p|\
 	cetron,ct3003|\
 	cetron,ct3003-ubootmod|\
 	cmcc,a10-stock|\
@@ -61,7 +56,6 @@ mediatek_setup_interfaces()
 	creatlentem,clt-r30b1-112m|\
 	creatlentem,clt-r30b1-ubi|\
 	cudy,wr3000-v1|\
-	globitel,bt-r320|\
 	huasifei,wh3000r-nand|\
 	jcg,q30-pro|\
 	keenetic,kn-3711|\
@@ -126,7 +120,6 @@ mediatek_setup_interfaces()
 	cudy,ap3000wall-v1)
 		ucidef_set_interface_lan "lan1 lan2 lan3 lan4 lan5"
 		;;
-	comfast,cf-xr186|\
 	cudy,ap3000outdoor-v1|\
 	cudy,ap3000-v1|\
 	cudy,re3000-v1|\
@@ -148,16 +141,12 @@ mediatek_setup_interfaces()
 	edgecore,eap111|\
 	huasifei,wh3000-emmc|\
 	huasifei,wh3000-pro-emmc|\
-	huasifei,wh3000-pro-nand|\
-	wavlink,wl-wnt100x3|\
-	wavlink,wl-wnt100x3-ubootmod)
+	huasifei,wh3000-pro-nand)
 		ucidef_set_interfaces_lan_wan eth0 eth1
 		;;
 	bazis,ax3000wm|\
 	cudy,m3000-v1|\
-	cudy,m3000-v1-ubootmod|\
 	cudy,m3000-v2-yt8821|\
-	cudy,m3000-v2-yt8821-ubootmod|\
 	cudy,tr3000-256mb-v1|\
 	cudy,tr3000-v1|\
 	cudy,tr3000-v1-ubootmod|\
@@ -208,9 +197,6 @@ mediatek_setup_interfaces()
 	mercusys,mr90x-v1|\
 	mercusys,mr90x-v1-ubi)
 		ucidef_set_interfaces_lan_wan "lan0 lan1 lan2" eth1
-		;;
-	tenda,be12-pro)
-		ucidef_set_interfaces_lan_wan "lan3 lan4 lan5 eth1" eth2
 		;;
 	tplink,fr365-v1)
 		ucidef_set_interfaces_lan_wan "port1 port3 port4 port5 port6" "port2"
@@ -320,6 +306,11 @@ mediatek_setup_macs()
 		lan_mac=$(mtd_get_mac_ascii factory lanMac)
 		wan_mac=$(macaddr_add "$lan_mac" 1)
 		label_mac=$wan_mac
+		;;
+	ruijie,rg-x60-pro)
+		label_mac=$(mtd_get_mac_ascii product_info ethaddr)
+		wan_mac=$label_mac
+		lan_mac=$(macaddr_add "$label_mac" 1)
 		;;
 	tplink,eap683-lr|\
 	tplink,f65-v1)

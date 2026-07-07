@@ -299,22 +299,6 @@ endef
 $(eval $(call KernelPackage,multimedia-input))
 
 
-define KernelPackage/cec-core
-  SUBMENU:=$(VIDEO_MENU)
-  TITLE:=CEC framework
-  HIDDEN:=1
-  KCONFIG:=CONFIG_CEC_CORE
-  FILES:=$(LINUX_DIR)/drivers/media/cec/core/cec.ko
-  AUTOLOAD:=$(call AutoProbe,cec)
-endef
-
-define KernelPackage/cec-core/description
-  CEC framework.
-endef
-
-$(eval $(call KernelPackage,cec-core))
-
-
 define KernelPackage/drm
   SUBMENU:=$(VIDEO_MENU)
   TITLE:=Direct Rendering Manager (DRM) support
@@ -351,27 +335,10 @@ endef
 
 $(eval $(call KernelPackage,drm-buddy))
 
-
-define KernelPackage/drm-client-lib
-  SUBMENU:=$(VIDEO_MENU)
-  TITLE:=DRM client library setup helper
-  DEPENDS:=@DISPLAY_SUPPORT @LINUX_6_18 +kmod-drm +kmod-drm-kms-helper
-  KCONFIG:=CONFIG_DRM_CLIENT_LIB
-  FILES:= $(LINUX_DIR)/drivers/gpu/drm/clients/drm_client_lib.ko
-  AUTOLOAD:=$(call AutoProbe,drm_client_lib)
-endef
-
-define KernelPackage/drm-client-lib/description
-  DRM client library setup helper
-endef
-
-$(eval $(call KernelPackage,drm-client-lib))
-
-
 define KernelPackage/drm-display-helper
   SUBMENU:=$(VIDEO_MENU)
   TITLE:=DRM helpers for display adapters drivers
-  DEPENDS:=@DISPLAY_SUPPORT +kmod-drm-kms-helper +LINUX_6_18:kmod-cec-core
+  DEPENDS:=@DISPLAY_SUPPORT +kmod-drm-kms-helper
   HIDDEN:=1
   KCONFIG:=CONFIG_DRM_DISPLAY_HELPER
   FILES:=$(LINUX_DIR)/drivers/gpu/drm/display/drm_display_helper.ko
@@ -440,8 +407,7 @@ define KernelPackage/drm-mipi-dbi
   SUBMENU:=$(VIDEO_MENU)
   HIDDEN:=1
   TITLE:=MIPI DBI helpers
-  DEPENDS:=@DISPLAY_SUPPORT +kmod-backlight +kmod-drm-kms-helper \
-    +LINUX_6_18:kmod-drm-client-lib
+  DEPENDS:=@DISPLAY_SUPPORT +kmod-backlight +kmod-drm-kms-helper
   KCONFIG:=CONFIG_DRM_MIPI_DBI
   FILES:=$(LINUX_DIR)/drivers/gpu/drm/drm_mipi_dbi.ko
   AUTOLOAD:=$(call AutoProbe,drm_mipi_dbi)
@@ -494,8 +460,7 @@ define KernelPackage/drm-ttm-helper
   TITLE:=Helpers for ttm-based gem objects
   HIDDEN:=1
   DEPENDS:=@DISPLAY_SUPPORT +kmod-drm-ttm +kmod-drm-kms-helper
-  KCONFIG:=CONFIG_DRM_TTM_HELPER \
-	   CONFIG_DRM_DISPLAY_HELPER_CEC=n
+  KCONFIG:=CONFIG_DRM_TTM_HELPER
   FILES:=$(LINUX_DIR)/drivers/gpu/drm/drm_ttm_helper.ko
   AUTOLOAD:=$(call AutoProbe,drm_ttm_helper)
 endef
@@ -560,7 +525,7 @@ define KernelPackage/drm-amdgpu
   DEPENDS:=@TARGET_x86||TARGET_loongarch64 @DISPLAY_SUPPORT +kmod-backlight +kmod-drm-ttm \
 	+kmod-drm-ttm-helper +kmod-drm-kms-helper +kmod-i2c-algo-bit +amdgpu-firmware \
 	+kmod-drm-display-helper +kmod-drm-buddy +kmod-acpi-video \
-	+kmod-drm-exec +kmod-drm-suballoc-helper +kmod-drm +kmod-drm-panel-backlight-quirks
+	+kmod-drm-exec +kmod-drm-suballoc-helper
   KCONFIG:=CONFIG_DRM_AMDGPU \
 	CONFIG_DRM_AMDGPU_SI=y \
 	CONFIG_DRM_AMDGPU_CIK=y \
@@ -797,23 +762,6 @@ endef
 $(eval $(call KernelPackage,drm-panel-mipi-dbi))
 
 
-define KernelPackage/drm-panel-backlight-quirks
-  SUBMENU:=$(VIDEO_MENU)
-  TITLE:=Panel backlight quirks
-  HIDDEN:=1
-  KCONFIG:=CONFIG_DRM_PANEL_BACKLIGHT_QUIRKS
-  DEPENDS:=+kmod-backlight
-  FILES:=$(LINUX_DIR)/drivers/gpu/drm/drm_panel_backlight_quirks.ko
-  AUTOLOAD:=$(call AutoProbe,panel-backlight-quirks)
-endef
-
-define KernelPackage/drm-panel-backlight-quirks/description
-  Panel backlight quirks
-endef
-
-$(eval $(call KernelPackage,drm-panel-backlight-quirks))
-
-
 define KernelPackage/drm-panel-simple
   SUBMENU:=$(VIDEO_MENU)
   TITLE:=Simple (non-eDP) TFT panels
@@ -858,7 +806,7 @@ define KernelPackage/drm-radeon
   DEPENDS:=@TARGET_x86 @DISPLAY_SUPPORT +kmod-backlight +kmod-drm-kms-helper \
 	+kmod-drm-ttm +kmod-drm-ttm-helper +kmod-i2c-algo-bit +radeon-firmware \
 	+kmod-drm-display-helper +kmod-acpi-video +kmod-drm-suballoc-helper \
-	+kmod-fb-io-fops +kmod-drm-exec
+	+kmod-fb-io-fops
   KCONFIG:=CONFIG_DRM_RADEON
   FILES:=$(LINUX_DIR)/drivers/gpu/drm/radeon/radeon.ko
   AUTOLOAD:=$(call AutoProbe,radeon)
@@ -1540,45 +1488,6 @@ endef
 
 $(eval $(call KernelPackage,video-gspca-konica))
 
-
-define KernelPackage/video-sun6i-csi
-  SUBMENU:=$(VIDEO_MENU)
-  DEPENDS:=@TARGET_sunxi +kmod-video-fwnode +kmod-video-async +kmod-video-videobuf2 +kmod-video-dma-contig
-  TITLE:=Allwinner A31 Camera Sensor Interface (CSI)
-  KCONFIG:=CONFIG_VIDEO_SUN6I_CSI
-  FILES:=$(LINUX_DIR)/drivers/media/platform/sunxi/sun6i-csi/sun6i-csi.ko
-  AUTOLOAD:=$(call AutoProbe,sun6i-csi)
-  $(call AddDepends/video)
-endef
-
-define KernelPackage/video-sun6i-csi/description
-  Support for the Allwinner A31 Camera Sensor Interface (CSI)
-  controller, also found on other platforms such as the A83T, H3,
-  V3/V3s or A64.
-endef
-
-$(eval $(call KernelPackage,video-sun6i-csi))
-
-define KernelPackage/video-ov5640
-  SUBMENU:=$(VIDEO_MENU)
-  DEPENDS:=+kmod-video-fwnode +kmod-video-async
-  TITLE:=OmniVision OV5640 sensor support
-  KCONFIG:= \
-	CONFIG_VIDEO_CAMERA_SENSOR=y \
-	CONFIG_VIDEO_OV5640
-  FILES:=$(LINUX_DIR)/drivers/media/i2c/ov5640.ko
-  AUTOLOAD:=$(call AutoProbe,ov5640)
-  $(call AddDepends/video)
-endef
-
-define KernelPackage/video-ov5640/description
-  This is a Video4Linux2 sensor driver for the Omnivision
-  OV5640 camera sensor with a MIPI CSI-2 interface.
-endef
-
-$(eval $(call KernelPackage,video-ov5640))
-
-
 #
 # Video Processing
 #
@@ -1673,91 +1582,6 @@ define KernelPackage/video-pxp/description
 endef
 
 $(eval $(call KernelPackage,video-pxp))
-
-define KernelPackage/video-imx-mipi-csis
-  TITLE:=i.MX7/8 MIPI-CSI2 CSIS receiver
-  DEPENDS:=@TARGET_imx +kmod-video-async +kmod-video-fwnode
-  KCONFIG:=CONFIG_VIDEO_IMX_MIPI_CSIS
-  FILES:= \
-	$(LINUX_DIR)/drivers/media/platform/nxp/imx-mipi-csis.ko
-  AUTOLOAD:=$(call AutoProbe,imx-mipi-csis)
-  $(call AddDepends/video)
-endef
-
-define KernelPackage/video-imx-mipi-csis/description
- Enable support for NXP MIPI CSI-2 CSIS receiver found on i.MX7
- and i.MX8 models
-endef
-
-$(eval $(call KernelPackage,video-imx-mipi-csis))
-
-define KernelPackage/video-imx7-csi
-  TITLE:=i.MX7 CSI interface
-  DEPENDS:=@TARGET_imx +kmod-video-dma-contig +kmod-video-fwnode
-  KCONFIG:=CONFIG_VIDEO_IMX7_CSI
-  FILES:= \
-	$(LINUX_DIR)/drivers/media/platform/nxp/imx7-media-csi.ko
-  AUTOLOAD:=$(call AutoProbe,imx7-media-csi)
-  $(call AddDepends/video)
-endef
-
-define KernelPackage/video-imx7-csi/description
- Enable support for video4linux camera sensor interface driver
- for i.MX6UL/L or i.MX7.
-endef
-
-$(eval $(call KernelPackage,video-imx7-csi))
-
-define KernelPackage/video-imx8mq-mipi-csi2
-  TITLE:=i.MX8MQ MIPI CSI2 receiver
-  DEPENDS:=@TARGET_imx +kmod-video-fwnode
-  KCONFIG:=CONFIG_VIDEO_IMX8MQ_MIPI_CSI2
-  FILES:= \
-	$(LINUX_DIR)/drivers/media/platform/nxp/imx8mq-mipi-csi2.ko
-  AUTOLOAD:=$(call AutoProbe,imx8mq-mipi-csi2)
-  $(call AddDepends/video)
-endef
-
-define KernelPackage/video-imx8mq-mipi-csi2/description
- Enable support for video4linux camera sensor interface driver
- for i.MX8M and P series.
-endef
-
-$(eval $(call KernelPackage,video-imx8mq-mipi-csi2))
-
-define KernelPackage/video-mux
-  TITLE:=Video Multiplexer
-  DEPENDS:=@(TARGET_imx&&TARGET_imx_cortexa7) +kmod-video-async +kmod-mux-core
-  KCONFIG:=CONFIG_VIDEO_MUX
-  FILES:=$(LINUX_DIR)/drivers/media/platform/video-mux.ko
-  AUTOLOAD:=$(call AutoProbe,video-mux)
-  $(call AddDepends/video)
-endef
-
-define KernelPackage/video-mux/description
- This driver provides support for N:1 video bus multiplexers.
-endef
-
-$(eval $(call KernelPackage,video-mux))
-
-define KernelPackage/video-ov5645
-  TITLE:=OmniVision OV5645 sensor support
-  DEPENDS:=@(TARGET_imx&&TARGET_imx_cortexa7) +kmod-video-fwnode
-  KCONFIG:= \
-	CONFIG_MEDIA_CAMERA_SUPPORT=y \
-	CONFIG_VIDEO_CAMERA_SENSOR=y \
-	CONFIG_VIDEO_OV5645
-  FILES:=$(LINUX_DIR)/drivers/media/i2c/ov5645.ko
-  AUTOLOAD:=$(call AutoProbe,ov5645)
-  $(call AddDepends/video)
-endef
-
-define KernelPackage/video-ov5645/description
- This is a Video4Linux2 sensor driver for the OmniVision
- OV5645 camera.
-endef
-
-$(eval $(call KernelPackage,video-ov5645))
 
 define KernelPackage/video-tw686x
   TITLE:=TW686x support

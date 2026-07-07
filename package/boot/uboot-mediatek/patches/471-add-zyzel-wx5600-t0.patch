@@ -1,8 +1,7 @@
 --- /dev/null
 +++ b/configs/mt7986_zyxel_wx5600-t0_defconfig
-@@ -0,0 +1,150 @@
+@@ -0,0 +1,146 @@
 +CONFIG_ARM=y
-+CONFIG_ARM_SMCCC=y
 +CONFIG_CMD_MII=y
 +CONFIG_CMD_MDIO=y
 +CONFIG_SYS_HAS_NONCACHED_MEMORY=y
@@ -40,7 +39,6 @@
 +CONFIG_CMD_ASKENV=y
 +CONFIG_CMD_ERASEENV=y
 +CONFIG_CMD_ENV_FLAGS=y
-+CONFIG_CMD_RNG=y
 +CONFIG_CMD_STRINGS=y
 +CONFIG_CMD_DM=y
 +CONFIG_CMD_GPIO=y
@@ -126,8 +124,6 @@
 +CONFIG_DM_PWM=y
 +CONFIG_PWM_MTK=y
 +CONFIG_RAM=y
-+CONFIG_DM_RNG=y
-+CONFIG_RNG_MTK_V2=y
 +CONFIG_SCSI=y
 +CONFIG_DM_SERIAL=y
 +CONFIG_MTK_SERIAL=y
@@ -167,7 +163,7 @@
 +/ {
 +	model = "Zyxel wx5600-T0 ubootmod";
 +	compatible = "zyxel,wx-5600", "mediatek,mt7986";
-+
++   
 +   options {
 +       u-boot {
 +          compatible = "u-boot,config";
